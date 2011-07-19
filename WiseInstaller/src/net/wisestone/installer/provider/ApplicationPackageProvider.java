@@ -1,12 +1,18 @@
-/**
- * 
+/*
+ * (#) net.wisestone.installer.provider.ApplicationPackageProvider.java
+ * Created on 2011. 7. 18.
  */
 package net.wisestone.installer.provider;
 
+import java.util.Arrays;
+
+import net.wisestone.android.database.SelectionBuilder;
 import net.wisestone.installer.provider.ApplicationPackage.Packages;
 import net.wisestone.installer.provider.ApplicationPackageDatabase.Tables;
+
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,8 +20,10 @@ import android.net.Uri;
 import android.util.Log;
 
 /**
- * @author exia2
- *
+ * 
+ * 
+ * @author ms29.seo@gmail.com
+ * @version 0.1
  */
 public class ApplicationPackageProvider extends ContentProvider
 {
@@ -69,24 +77,49 @@ public class ApplicationPackageProvider extends ContentProvider
     /* (non-Javadoc)
      * @see android.content.ContentProvider#onCreate()
      */
-    @Override
     public boolean onCreate() {
-        return false;
+        final Context context = getContext();
+        mOpenHelper = new ApplicationPackageDatabase(context);
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see android.content.ContentProvider#getType(android.net.Uri)
+     */
+    public String getType(Uri uri) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PACKAGES:
+                return Packages.CONTENT_TYPE;
+            case PACKAGES_ID:
+                return Packages.CONTENT_ITEM_TYPE;
+            default:
+                throw new UnsupportedOperationException("Unkonwn uri: " + uri);
+        }
     }
 
     /* (non-Javadoc)
      * @see android.content.ContentProvider#query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String)
      */
-    @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
-        return null;
+        if (LOGV) {
+            Log.v(TAG, "query(uri=" + uri + ", proj=" + Arrays.toString(projection) + ")");
+        }
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            default:
+                // Most cases are handled with simple SelectionBuilder
+                final SelectionBuilder builder = buildExpandedSelection(uri, match);
+                return builder.where(selection, selectionArgs).query(db, projection, sortOrder);
+        }
     }
 
     /* (non-Javadoc)
      * @see android.content.ContentProvider#insert(android.net.Uri, android.content.ContentValues)
      */
-    @Override
     public Uri insert(Uri uri, ContentValues values) {
         if (LOGV) {
             Log.v(TAG, "insert(uri=" + uri + ", values=" + values.toString() + ")");
@@ -105,29 +138,63 @@ public class ApplicationPackageProvider extends ContentProvider
     }
 
     /* (non-Javadoc)
-     * @see android.content.ContentProvider#delete(android.net.Uri, java.lang.String, java.lang.String[])
-     */
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
-    }
-
-    /* (non-Javadoc)
      * @see android.content.ContentProvider#update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[])
      */
-    @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        if (LOGV) Log.v(TAG, "update(uri=" + uri + ", values=" + values.toString() + ")");
+        if (LOGV) {
+            Log.v(TAG, "update(uri=" + uri + ", values=" + values.toString() + ")");
+        }
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        return 0;
+        final SelectionBuilder builder = buildSimpleSelection(uri);
+        return builder.where(selection, selectionArgs).update(db, values);
     }
 
     /* (non-Javadoc)
-     * @see android.content.ContentProvider#getType(android.net.Uri)
+     * @see android.content.ContentProvider#delete(android.net.Uri, java.lang.String, java.lang.String[])
      */
-    @Override
-    public String getType(Uri uri) {
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        if (LOGV) {
+            Log.v(TAG, "delete(uri=" + uri + ")");
+        }
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final SelectionBuilder builder = buildSimpleSelection(uri);
+        return builder.where(selection, selectionArgs).delete(db);
+    }
+
+    /**
+     * @param uri
+     * @return
+     */
+    private SelectionBuilder buildSimpleSelection(Uri uri) {
+        final SelectionBuilder builder = new SelectionBuilder();
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PACKAGES:
+    
+            break;
+    
+            default: {
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
+        }
         return null;
+    }
+
+    private SelectionBuilder buildExpandedSelection(Uri uri, int match) {
+        final SelectionBuilder builder = new SelectionBuilder();
+        switch (match) {
+            case PACKAGES: {
+                return builder.table(Tables.PACKAGES).mapToTable(Packages._ID, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_ID, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_NAME, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_VERSIONCODE, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_VERSIONNAME, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_FILE, Tables.PACKAGES);
+            }
+            default: {
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
+        }
     }
 
 }
