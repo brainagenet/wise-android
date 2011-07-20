@@ -20,6 +20,9 @@
         
         <service android:name=".service.ApplicationPackageScanService" />
         
+        <provider android:name=".provider.ApplicationPackageProvider" android:authorities="net.wisestone.android.apps.wiseinstaller">
+        </provider>
+        
     </application>
     
 </manifest>
