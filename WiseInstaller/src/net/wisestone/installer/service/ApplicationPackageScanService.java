@@ -23,6 +23,8 @@ public class ApplicationPackageScanService extends IntentService
 
     private ContentResolver mResolver;
     
+    private ApplicationPackageScanner mScanner;
+    
     /**
      * @param name
      */
@@ -34,6 +36,7 @@ public class ApplicationPackageScanService extends IntentService
         super.onCreate();
         
         mResolver = getContentResolver();
+        mScanner = new ApplicationPackageScanner(this, mResolver);
     }
 
     /* (non-Javadoc)
@@ -53,10 +56,7 @@ public class ApplicationPackageScanService extends IntentService
             scanBaseDir.mkdirs();
         }
         
-        scan(scanBaseDir);
-    }
-
-    private void scan(File scanBaseDir) {
+        mScanner.scan(scanBaseDir);
     }
 
 }

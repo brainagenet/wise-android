@@ -21,9 +21,11 @@ public final class ApplicationPackage
         /** Unique string identifying this package (equal package name). */
         String PACKAGE_ID = "package_id";
         String PACKAGE_NAME = "package_name";
+        String PACKAGE_LABEL = "package_label";
         String PACKAGE_VERSIONCODE = "package_vercd";
         String PACKAGE_VERSIONNAME = "package_vernm";
         String PACKAGE_FILE = "package_file";
+        String PACKAGE_ICON = "package_icon";
     }
 
     private static final String PATH_PACKAGES = "packages";
@@ -42,10 +44,14 @@ public final class ApplicationPackage
 
         public static final String PACKAGES_COUNT = "packages_count";
 
-        public static final String DEFAULT_SORT = PackagesColumns.PACKAGE_NAME + " ASC";
+        public static final String DEFAULT_SORT = PackagesColumns.PACKAGE_LABEL + " ASC";
         
         public static Uri buildPackageUri(String packageId) {
             return CONTENT_URI.buildUpon().appendPath(packageId).build();
+        }
+        
+        public static String getPackageId(Uri uri) {
+            return uri.getPathSegments().get(1);
         }
     }
 

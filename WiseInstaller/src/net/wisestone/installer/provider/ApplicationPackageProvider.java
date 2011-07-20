@@ -30,7 +30,7 @@ public class ApplicationPackageProvider extends ContentProvider
 
     private static final String TAG = "ApplicationPackageProvider";
 
-    private static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean LOGV = true;
 
     private ApplicationPackageDatabase mOpenHelper;
 
@@ -190,6 +190,16 @@ public class ApplicationPackageProvider extends ContentProvider
                         .mapToTable(Packages.PACKAGE_VERSIONCODE, Tables.PACKAGES)
                         .mapToTable(Packages.PACKAGE_VERSIONNAME, Tables.PACKAGES)
                         .mapToTable(Packages.PACKAGE_FILE, Tables.PACKAGES);
+            }
+            case PACKAGES_ID: {
+                final String packageId = Packages.getPackageId(uri);
+                return builder.table(Tables.PACKAGES).mapToTable(Packages._ID, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_ID, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_NAME, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_VERSIONCODE, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_VERSIONNAME, Tables.PACKAGES)
+                        .mapToTable(Packages.PACKAGE_FILE, Tables.PACKAGES)
+                        .where(Packages.PACKAGE_ID + " = ?", packageId);
             }
             default: {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

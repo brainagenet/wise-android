@@ -59,10 +59,11 @@ public class ApplicationPackageDatabase extends SQLiteOpenHelper
 
         db.execSQL("CREATE TABLE " + Tables.PACKAGES + " (" + Packages._ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + Packages.PACKAGE_ID + " TEXT NOT NULL, "
-                + Packages.PACKAGE_NAME + " TEXT NOT NULL, " + Packages.PACKAGE_VERSIONCODE
-                + " INTEGER NOT NULL, " + Packages.PACKAGE_VERSIONNAME + " TEXT NOT NULL, "
-                + Packages.PACKAGE_FILE + " TEXT NOT NULL, UNIQUE (" + Packages.PACKAGE_ID
-                + ") ON CONFLICT REPLACE)");
+                + Packages.PACKAGE_NAME + " TEXT NOT NULL, " + Packages.PACKAGE_LABEL
+                + " TEXT NOT NULL, " + Packages.PACKAGE_VERSIONCODE + " INTEGER NOT NULL, "
+                + Packages.PACKAGE_VERSIONNAME + " TEXT NOT NULL, " + Packages.PACKAGE_FILE
+                + " TEXT NOT NULL, " + Packages.PACKAGE_ICON + " TEXT NOT NULL, " + "UNIQUE ("
+                + Packages.PACKAGE_ID + ") ON CONFLICT REPLACE)");
     }
 
     /* (non-Javadoc)
